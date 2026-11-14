@@ -8,9 +8,9 @@
     "start": "tsx src/server.ts",
     "worker": "tsx watch --env-file=../../.env src/worker.ts",
     "worker:start": "tsx src/worker.ts",
-    "audit:verify": "tsx --env-file=../../.env src/scripts/audit-verify.ts",
+    "audit:verify": "tsx --env-file-if-exists=../../.env src/scripts/audit-verify.ts",
     "typecheck": "tsc -p tsconfig.json",
-    "seed": "tsx --env-file=../../.env src/scripts/seed.ts",
+    "seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts",
     "create-admin": "tsx src/scripts/create-admin.ts",
     "seed:production": "tsx src/scripts/seed.ts --production"
   },
