@@ -1,0 +1,5 @@
+# DUMMY — aturan validasi berkas contoh. Sesuaikan dengan pedoman PMB resmi.
+rules:
+  - { docType: pas_foto, label: "Pas foto", extensions: [jpg, jpeg, png], mimeTypes: [image/jpeg, image/png], maxBytes: 524288 }
+  - { docType: ijazah, label: "Ijazah/SKL", extensions: [pdf], mimeTypes: [application/pdf], maxBytes: 2097152 }
+  - { docType: rapor, label: "Rapor", extensions: [pdf], mimeTypes: [application/pdf], maxBytes: 5242880 }

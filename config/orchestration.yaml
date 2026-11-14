@@ -1,0 +1,18 @@
+# DUMMY — daftar periksa siklus orkestrasi Staf PMB (FR-35). Butir resmi dari peneliti [PERLU DATA] (OP-06).
+# Lima fungsi: merencanakan – mengajari – memantau – mengintervensi – belajar.
+functions:
+  - id: plan
+    label: Merencanakan
+    items: ["[DUMMY] Butir merencanakan 1", "[DUMMY] Butir merencanakan 2"]
+  - id: teach
+    label: Mengajari
+    items: ["[DUMMY] Butir mengajari 1"]
+  - id: monitor
+    label: Memantau
+    items: ["[DUMMY] Butir memantau 1"]
+  - id: intervene
+    label: Mengintervensi
+    items: ["[DUMMY] Butir mengintervensi 1"]
+  - id: learn
+    label: Belajar
+    items: ["[DUMMY] Butir belajar 1"]

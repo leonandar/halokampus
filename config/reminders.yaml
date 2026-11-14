@@ -1,0 +1,4 @@
+# DUMMY — aturan pengingat proaktif (FR-16). Sesuaikan dengan kebijakan PMB.
+lead_days: 7          # kirim pengingat bila tenggat unggah berkas ≤ 7 hari lagi
+min_interval_hours: 24 # paling sering sekali per 24 jam per pendaftar
+deadline_code: upload

@@ -1,0 +1,12 @@
+# DUMMY — templat sementara. Isi resmi TP-01…TP-10 berasal dari Buku Panduan haloK@MPUS [PERLU DATA].
+templates:
+  - { code: TP-01, title: "[DUMMY] Salam pembuka", body: "Halo Kak, saya Mahasiswa CP PMB. Terima kasih sudah menunggu." }
+  - { code: TP-02, title: "[DUMMY] Konfirmasi pemahaman", body: "Baik Kak, jadi Kakak menanyakan tentang …, betul?" }
+  - { code: TP-03, title: "[DUMMY] Meminta waktu", body: "Mohon tunggu sebentar ya Kak, saya periksa dahulu." }
+  - { code: TP-04, title: "[DUMMY] Rujuk pedoman", body: "Informasi lengkapnya ada di Pedoman PMB bagian …" }
+  - { code: TP-05, title: "[DUMMY] Diteruskan ke Staf", body: "Pertanyaan Kakak perlu ditangani Staf PMB. Sudah saya teruskan beserta ringkasannya, Kakak tidak perlu mengulang." }
+  - { code: TP-06, title: "[DUMMY] Penutup", body: "Apakah ada yang masih bisa kami bantu, Kak?" }
+  - { code: TP-07, title: "[DUMMY] Di luar kewenangan", body: "Mohon maaf Kak, keputusan tersebut bukan wewenang kami; kami teruskan ke Staf PMB." }
+  - { code: TP-08, title: "[DUMMY] Kendala teknis", body: "Silakan coba muat ulang halaman atau gunakan peramban lain." }
+  - { code: TP-09, title: "[DUMMY] Hak data pribadi", body: "Kakak dapat mengelola persetujuan dan data pribadi melalui tautan Data Pribadi." }
+  - { code: TP-10, title: "[DUMMY] Terima kasih", body: "Terima kasih Kak, semoga lancar pendaftarannya." }

@@ -1,0 +1,96 @@
+# DUMMY — contoh berlabel untuk pengembangan. Ganti dengan data berlabel hasil kurasi tim PMB
+# sebelum uji lapangan. Pola `rules` adalah regex (tidak peka huruf besar/kecil).
+temperature: 0.08
+min_similarity: 0.18
+human_request_patterns:
+  - "bicara (dengan|sama|ke) (manusia|orang|petugas|admin|cs)"
+  - "\\b(minta|mau|ingin) (dilayani|bicara|ngobrol).{0,15}(manusia|petugas|orang)"
+  - "\\boperator\\b"
+  - "\\bcustomer service\\b"
+emotion_patterns:
+  - "\\b(kecewa (sekali|berat|banget)|sangat kecewa)\\b"
+  - "\\b(marah|kesal banget|muak|keterlaluan|penipuan|tipu)\\b"
+  - "\\b(akan|mau) (lapor|laporkan|viralkan|tuntut)\\b"
+  - "!!!"
+# Action patterns (deterministic) checked before the RAG answer.
+action_patterns:
+  reschedule:
+    - "(jadwal ulang|ganti jadwal|ubah jadwal|pindah jadwal|reschedule).{0,20}(tes|ujian|seleksi)?"
+intents:
+  - category: pembayaran
+    rules:
+      - "(gagal|belum masuk|tidak masuk|ga masuk|gak masuk).{0,20}(bayar|pembayaran|transfer)"
+      - "(bayar|pembayaran|transfer).{0,25}(gagal|ganda|double|dua kali|belum (masuk|terverifikasi|terkonfirmasi)|salah)"
+      - "(sudah|udah) (bayar|transfer).{0,40}(belum|tidak|ga|gak)"
+      - "\\b(terpotong|terdebet) (dua kali|ganda)"
+      - "salah (jalur|kode) (bayar|pembayaran)"
+      - "\\brefund\\b|pengembalian dana"
+    examples:
+      - "pembayaran saya gagal tapi saldo terpotong"
+      - "saya sudah transfer tapi status belum lunas"
+      - "terbayar dua kali bagaimana pengembaliannya"
+  - category: perubahan_data
+    rules:
+      - "(ubah|ganti|ubahkan|koreksi|perbaiki|salah).{0,25}(nama|tanggal lahir|nik|data|prodi|pilihan|email|nomor hp|foto)"
+      - "(nama|tanggal lahir|nik|data diri).{0,20}(salah|keliru|typo)"
+    examples:
+      - "nama saya salah ketik di formulir tolong diubah"
+      - "saya mau ganti pilihan prodi"
+  - category: pengecualian
+    rules:
+      - "(dispensasi|pengecualian|keringanan|perpanjang(an)? (waktu|tenggat|batas))"
+      - "(boleh|bisa).{0,20}(telat|terlambat|lewat (batas|tenggat))"
+    examples:
+      - "apakah bisa dapat dispensasi tenggat unggah berkas"
+      - "saya minta keringanan biaya"
+  - category: jalur_khusus
+    rules:
+      - "\\b(disabilitas|difabel|afirmasi|3t|kip(-| )?k|penyandang|atlet berprestasi|hafiz|kelompok khusus)\\b"
+    examples:
+      - "saya penyandang disabilitas, apakah ada jalur khusus"
+      - "pendaftaran jalur afirmasi bagaimana"
+  - category: keluhan_berat
+    rules: []
+    examples:
+      - "pelayanan kalian sangat buruk saya kecewa sekali"
+  - category: jadwal
+    examples:
+      - "kapan batas akhir pendaftaran"
+      - "jadwal tes seleksi kapan"
+      - "tenggat unggah berkas sampai tanggal berapa"
+      - "kapan pengumuman hasil seleksi"
+  - category: biaya
+    examples:
+      - "berapa biaya pendaftaran"
+      - "biaya formulir pendaftaran berapa"
+      - "berapa uang pendaftaran jalur mandiri"
+  - category: persyaratan
+    examples:
+      - "apa saja syarat pendaftaran"
+      - "berkas apa saja yang harus diunggah"
+      - "format pas foto seperti apa"
+      - "ukuran maksimal file ijazah"
+  - category: status
+    rules:
+      - "\\b(status|cek) (pendaftaran|berkas|akun) (saya|aku)"
+    examples:
+      - "bagaimana status pendaftaran saya"
+      - "cek status berkas saya"
+      - "apakah berkas saya sudah lengkap"
+  - category: teknis
+    examples:
+      - "tidak bisa login ke portal pendaftaran"
+      - "lupa kata sandi akun pendaftaran"
+      - "halaman unggah berkas error"
+  - category: data_pribadi
+    rules:
+      - "\\b(hapus|unduh|lihat) data (pribadi|saya)\\b"
+      - "tarik persetujuan"
+    examples:
+      - "saya ingin menghapus data pribadi saya"
+  - category: info_umum
+    examples:
+      - "jalur pendaftaran apa saja yang tersedia"
+      - "program studi apa saja yang dibuka"
+      - "di mana lokasi kampus"
+      - "halo selamat pagi"

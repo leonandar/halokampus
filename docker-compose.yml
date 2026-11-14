@@ -1,0 +1,79 @@
+# haloK@MPUS — semua layanan. Pengembangan: `docker compose up -d postgres redis mailpit`
+# lalu jalankan api/worker/web/mock-pmb dengan pnpm. Produksi lokal: `docker compose --profile app up -d`.
+# LLM lokal: tambahkan `--profile local-llm`.
+name: halokampus
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: halokampus
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-halokampus_dev}
+      POSTGRES_DB: halokampus
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U halokampus"]
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports: ["8025:8025", "1025:1025"]
+  ollama:
+    image: ollama/ollama:0.5.7
+    profiles: [local-llm]
+    ports: ["11434:11434"]
+    volumes: [ollama:/root/.ollama]
+  mock-pmb:
+    profiles: [app]
+    build: { context: ., dockerfile: docker/node.Dockerfile }
+    command: ["pnpm", "--filter", "@hk/mock-pmb", "start"]
+    env_file: .env
+    ports: ["4100:4100"]
+  api:
+    profiles: [app]
+    build: { context: ., dockerfile: docker/node.Dockerfile }
+    command: ["sh", "-c", "pnpm --filter @hk/db migrate && pnpm --filter @hk/api start"]
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://halokampus:${POSTGRES_PASSWORD:-halokampus_dev}@postgres:5432/halokampus
+      REDIS_URL: redis://redis:6379
+      PMB_API_URL: http://mock-pmb:4100
+      SMTP_HOST: mailpit
+    depends_on: [postgres, redis]
+    ports: ["4000:4000"]
+  worker:
+    profiles: [app]
+    build: { context: ., dockerfile: docker/node.Dockerfile }
+    command: ["pnpm", "--filter", "@hk/api", "worker:start"]
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://halokampus:${POSTGRES_PASSWORD:-halokampus_dev}@postgres:5432/halokampus
+      REDIS_URL: redis://redis:6379
+      PMB_API_URL: http://mock-pmb:4100
+      SMTP_HOST: mailpit
+    depends_on: [postgres, redis]
+  web:
+    profiles: [app]
+    build: { context: ., dockerfile: docker/node.Dockerfile }
+    command: ["pnpm", "--filter", "@hk/web", "start"]
+    env_file: .env
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    ports: ["3000:3000"]
+  caddy:
+    image: caddy:2.8
+    profiles: [app]
+    ports: ["80:80", "443:443"]
+    environment:
+      HALOKAMPUS_DOMAIN: ${HALOKAMPUS_DOMAIN:-halokampus.example.ac.id}
+    volumes: ["./docker/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy_data:/data"]
+    depends_on: [web, api]
+volumes:
+  caddy_data:
+  pgdata:
+  ollama:

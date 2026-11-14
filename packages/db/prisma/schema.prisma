@@ -1,0 +1,540 @@
+// haloK@MPUS database schema (ARSITEKTUR §6).
+// Columns suffixed `Enc` hold AES-256-GCM ciphertext; `Bidx` holds an HMAC blind index.
+// `audit_logs` and `events` are append-only (DB triggers in the init migration).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+model Role {
+  code        String @id
+  label       String
+  users       User[]
+  @@map("roles")
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  name            String
+  passwordHash    String    @map("password_hash")
+  totpSecretEnc   String?   @map("totp_secret_enc")
+  totpEnabled     Boolean   @default(false) @map("totp_enabled")
+  roleCode        String    @map("role_code")
+  role            Role      @relation(fields: [roleCode], references: [code])
+  active          Boolean   @default(true)
+  presence        String    @default("offline") // online | break | offline
+  failedLogins    Int       @default(0) @map("failed_logins")
+  lockedUntil     DateTime? @map("locked_until") @db.Timestamptz
+  isDummy         Boolean   @default(false) @map("is_dummy")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  sessions        StaffSession[]
+  assignments     TicketAssignment[]
+  overrides       Override[]
+  presenceLogs    PresenceLog[]
+  @@map("users")
+}
+
+model StaffSession {
+  id          String   @id // sha256 of the session token
+  userId      String   @map("user_id") @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  csrfToken   String   @map("csrf_token")
+  twoFactorOk Boolean  @default(false) @map("two_factor_ok")
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@map("staff_sessions")
+}
+
+model PresenceLog {
+  id      String   @id @default(uuid()) @db.Uuid
+  userId  String   @map("user_id") @db.Uuid
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status  String
+  at      DateTime @default(now()) @db.Timestamptz
+  @@index([userId, at])
+  @@map("presence_logs")
+}
+
+model Channel {
+  code           String    @id // web | whatsapp | instagram | messenger | email | telegram | phone
+  name           String
+  capabilities   Json
+  enabled        Boolean   @default(true)
+  aiPaused       Boolean   @default(false) @map("ai_paused")
+  aiPausedReason String?   @map("ai_paused_reason")
+  aiPausedBy     String?   @map("ai_paused_by") @db.Uuid
+  aiPausedAt     DateTime? @map("ai_paused_at") @db.Timestamptz
+  configEnc      String?   @map("config_enc")
+  @@map("channels")
+}
+
+model Customer {
+  id                String    @id @default(uuid()) @db.Uuid
+  pseudoId          String    @unique @default(uuid()) @map("pseudo_id") @db.Uuid
+  displayNameEnc    String?   @map("display_name_enc")
+  regNoEnc          String?   @map("reg_no_enc")
+  regNoBidx         String?   @unique @map("reg_no_bidx")
+  contactEmailEnc   String?   @map("contact_email_enc")
+  contactPhoneEnc   String?   @map("contact_phone_enc")
+  programCode       String?   @map("program_code")
+  admissionPath     String?   @map("admission_path")
+  stage             String?
+  verifiedAt        DateTime? @map("verified_at") @db.Timestamptz
+  anonymizedAt      DateTime? @map("anonymized_at") @db.Timestamptz
+  isDummy           Boolean   @default(false) @map("is_dummy")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  identities        CustomerIdentity[]
+  consents          Consent[]
+  conversations     Conversation[]
+  tickets           Ticket[]
+  dsrs              DataSubjectRequest[]
+  otps              Otp[]
+  @@map("customers")
+}
+
+model CustomerIdentity {
+  id              String    @id @default(uuid()) @db.Uuid
+  customerId      String    @map("customer_id") @db.Uuid
+  customer        Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  channelCode     String    @map("channel_code")
+  externalIdEnc   String    @map("external_id_enc")
+  externalIdBidx  String    @map("external_id_bidx")
+  verifiedAt      DateTime? @map("verified_at") @db.Timestamptz
+  linkedConsentAt DateTime? @map("linked_consent_at") @db.Timestamptz
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  @@unique([channelCode, externalIdBidx])
+  @@map("customer_identities")
+}
+
+model CustomerSession {
+  id          String   @id // sha256 of the bearer token
+  customerId  String   @map("customer_id") @db.Uuid
+  channelCode String   @map("channel_code")
+  purpose     String   @default("chat") // chat | data_rights
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([customerId])
+  @@map("customer_sessions")
+}
+
+model Consent {
+  id            String    @id @default(uuid()) @db.Uuid
+  customerId    String    @map("customer_id") @db.Uuid
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  purpose       String    // service | proactive_reminder | service_improvement
+  status        String    // granted | withdrawn
+  noticeVersion String    @map("notice_version")
+  channelCode   String    @map("channel_code")
+  grantedAt     DateTime  @default(now()) @map("granted_at") @db.Timestamptz
+  withdrawnAt   DateTime? @map("withdrawn_at") @db.Timestamptz
+  @@index([customerId, purpose])
+  @@map("consents")
+}
+
+model Otp {
+  id          String    @id @default(uuid()) @db.Uuid
+  customerId  String    @map("customer_id") @db.Uuid
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  codeHash    String    @map("code_hash")
+  target      String    // what is being verified, e.g. reg_no
+  attempts    Int       @default(0)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz
+  consumedAt  DateTime? @map("consumed_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  @@map("otps")
+}
+
+model Conversation {
+  id             String    @id @default(uuid()) @db.Uuid
+  customerId     String    @map("customer_id") @db.Uuid
+  customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  channelCode    String    @map("channel_code")
+  identityId     String?   @map("identity_id") @db.Uuid
+  ticketId       String?   @map("ticket_id") @db.Uuid
+  ticket         Ticket?   @relation(fields: [ticketId], references: [id])
+  startedAt      DateTime  @default(now()) @map("started_at") @db.Timestamptz
+  lastActivityAt DateTime  @default(now()) @map("last_activity_at") @db.Timestamptz
+  /// Deterministic dialogue state, e.g. {"awaiting":"reg_no"} during verification.
+  state          Json      @default("{}")
+  /// Inbound message held until the customer grants the mandatory service consent.
+  pendingMessageId String? @map("pending_message_id") @db.Uuid
+  messages       Message[]
+  @@index([customerId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @map("conversation_id") @db.Uuid
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  ticketId       String?      @map("ticket_id") @db.Uuid
+  senderType     String       @map("sender_type") // customer | ai | cp | staff | system
+  senderUserId   String?      @map("sender_user_id") @db.Uuid
+  kind           String       @default("text") // text | answer | handoff_card | reminder | system | file_check | status
+  bodyEnc        String       @map("body_enc")
+  meta           Json         @default("{}")
+  aiActionId     String?      @map("ai_action_id") @db.Uuid
+  deliveryStatus String       @default("sent") @map("delivery_status")
+  /// Provider-side id (wamid, mid, telegram message_id, email Message-ID) for status updates.
+  providerMessageId String?   @map("provider_message_id")
+  retracted      Boolean      @default(false)
+  isDummy        Boolean      @default(false) @map("is_dummy")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  @@index([conversationId, createdAt])
+  @@index([ticketId, createdAt])
+  @@index([providerMessageId])
+  @@map("messages")
+}
+
+model Ticket {
+  id                    String    @id @default(uuid()) @db.Uuid
+  number                Int       @unique @default(autoincrement())
+  customerId            String    @map("customer_id") @db.Uuid
+  customer              Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tier                  String    // T1 | T2 | T3
+  status                String
+  category              String
+  mandatoryCategory     Boolean   @default(false) @map("mandatory_category")
+  arrivalReason         String?   @map("arrival_reason")
+  lastConfidence        Decimal?  @map("last_confidence") @db.Decimal(5, 4)
+  negativeFeedbackStreak Int      @default(0) @map("negative_feedback_streak")
+  assignedUserId        String?   @map("assigned_user_id") @db.Uuid
+  lastChannelCode       String    @map("last_channel_code")
+  summaryEnc            String?   @map("summary_enc")
+  openedAt              DateTime  @default(now()) @map("opened_at") @db.Timestamptz
+  firstResponseAt       DateTime? @map("first_response_at") @db.Timestamptz
+  firstHumanResponseAt  DateTime? @map("first_human_response_at") @db.Timestamptz
+  resolvedAt            DateTime? @map("resolved_at") @db.Timestamptz
+  closedAt              DateTime? @map("closed_at") @db.Timestamptz
+  reopenCount           Int       @default(0) @map("reopen_count")
+  isDummy               Boolean   @default(false) @map("is_dummy")
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  conversations         Conversation[]
+  assignments           TicketAssignment[]
+  escalations           Escalation[]
+  slaTimers             SlaTimer[]
+  aiActions             AiAction[]
+  @@index([status, tier])
+  @@index([customerId])
+  @@map("tickets")
+}
+
+model TicketAssignment {
+  id         String    @id @default(uuid()) @db.Uuid
+  ticketId   String    @map("ticket_id") @db.Uuid
+  ticket     Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId     String    @map("user_id") @db.Uuid
+  user       User      @relation(fields: [userId], references: [id])
+  tier       String
+  claimedAt  DateTime  @default(now()) @map("claimed_at") @db.Timestamptz
+  releasedAt DateTime? @map("released_at") @db.Timestamptz
+  @@index([ticketId])
+  @@map("ticket_assignments")
+}
+
+model Escalation {
+  id          String   @id @default(uuid()) @db.Uuid
+  ticketId    String   @map("ticket_id") @db.Uuid
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fromTier    String   @map("from_tier")
+  toTier      String   @map("to_tier")
+  reasonCode  String   @map("reason_code")
+  reasonNote  String?  @map("reason_note")
+  handoffEnc  String?  @map("handoff_enc")
+  confidence  Decimal? @db.Decimal(5, 4)
+  actorType   String   @map("actor_type") // ai | cp | staff | system
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([ticketId])
+  @@map("escalations")
+}
+
+model SlaPolicy {
+  id        String  @id
+  tier      String
+  category  String? // null = any category
+  paramCode String  @map("param_code")
+  @@map("sla_policies")
+}
+
+model SlaTimer {
+  id          String    @id @default(uuid()) @db.Uuid
+  ticketId    String    @map("ticket_id") @db.Uuid
+  ticket      Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  tier        String
+  kind        String    // response | resolution
+  paramCode   String    @map("param_code")
+  policyVersion Int     @map("policy_version")
+  triggerAt   DateTime  @map("trigger_at") @db.Timestamptz
+  startsAt    DateTime  @map("starts_at") @db.Timestamptz
+  deadlineAt  DateTime  @map("deadline_at") @db.Timestamptz
+  state       String    @default("running") // running | met | breached | cancelled
+  settledAt   DateTime? @map("settled_at") @db.Timestamptz
+  @@index([state, deadlineAt])
+  @@index([ticketId])
+  @@map("sla_timers")
+}
+
+model AiAction {
+  id                   String   @id @default(uuid()) @db.Uuid
+  ticketId             String?  @map("ticket_id") @db.Uuid
+  ticket               Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  inboundMessageId     String?  @map("inbound_message_id") @db.Uuid
+  agent                String   // intent | answer | action | guard | summarizer | draft
+  actionType           String   @map("action_type")
+  authorityClass       String   @map("authority_class")
+  category             String?
+  confidence           Decimal? @db.Decimal(5, 4)
+  confidenceComponents Json     @default("{}") @map("confidence_components")
+  citations            Json     @default("[]")
+  guard                Json     @default("{}")
+  routing              Json     @default("{}")
+  outcome              String   // sent | escalated | blocked | overridden | failed
+  outputEnc            String?  @map("output_enc")
+  provider             String?
+  model                String?
+  location             String?
+  latencyMs            Int?     @map("latency_ms")
+  policyVersions       Json     @default("{}") @map("policy_versions")
+  channelCode          String?  @map("channel_code")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  overrides            Override[]
+  @@index([createdAt])
+  @@index([ticketId])
+  @@map("ai_actions")
+}
+
+model Override {
+  id             String   @id @default(uuid()) @db.Uuid
+  aiActionId     String   @map("ai_action_id") @db.Uuid
+  aiAction       AiAction @relation(fields: [aiActionId], references: [id])
+  staffUserId    String   @map("staff_user_id") @db.Uuid
+  staff          User     @relation(fields: [staffUserId], references: [id])
+  type           String   // cancel | replace | correct
+  causeCategory  String   @map("cause_category")
+  reason         String
+  replacementEnc String?  @map("replacement_enc")
+  notifyCustomer Boolean  @map("notify_customer")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@map("overrides")
+}
+
+model AuditLog {
+  seq          BigInt   @id @default(autoincrement())
+  at           DateTime @default(now()) @db.Timestamptz
+  actorType    String   @map("actor_type") // user | ai | system | customer
+  actorId      String?  @map("actor_id")
+  actorRole    String?  @map("actor_role")
+  action       String
+  resourceType String?  @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  detail       Json     @default("{}")
+  prevHash     String   @map("prev_hash")
+  hash         String   @unique
+  @@index([resourceType, resourceId])
+  @@index([at])
+  @@map("audit_logs")
+}
+
+model Event {
+  seq              BigInt   @id @default(autoincrement())
+  occurredAt       DateTime @map("occurred_at") @db.Timestamptz
+  type             String
+  ticketId         String?  @map("ticket_id") @db.Uuid
+  conversationId   String?  @map("conversation_id") @db.Uuid
+  customerPseudoId String?  @map("customer_pseudo_id") @db.Uuid
+  channel          String?
+  tier             String?
+  category         String?
+  actorType        String?  @map("actor_type")
+  actorId          String?  @map("actor_id")
+  payload          Json     @default("{}")
+  policyVersions   Json     @default("{}") @map("policy_versions")
+  isDummy          Boolean  @default(false) @map("is_dummy")
+  prevHash         String   @map("prev_hash")
+  hash             String   @unique
+  @@index([type, occurredAt])
+  @@index([ticketId])
+  @@map("events")
+}
+
+model KbDocument {
+  id             String    @id @default(uuid()) @db.Uuid
+  slug           String
+  title          String
+  version        Int
+  status         String    // draft | tested | published | retired
+  effectiveFrom  DateTime? @map("effective_from") @db.Date
+  effectiveTo    DateTime? @map("effective_to") @db.Date
+  scope          Json      @default("{}")
+  sourceText     String    @map("source_text")
+  embeddingModel String    @map("embedding_model")
+  testReport     Json?     @map("test_report")
+  testedAt       DateTime? @map("tested_at") @db.Timestamptz
+  testedBy       String?   @map("tested_by") @db.Uuid
+  publishedAt    DateTime? @map("published_at") @db.Timestamptz
+  publishedBy    String?   @map("published_by") @db.Uuid
+  createdBy      String?   @map("created_by") @db.Uuid
+  isDummy        Boolean   @default(false) @map("is_dummy")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  chunks         KbChunk[]
+  @@unique([slug, version])
+  @@map("kb_documents")
+}
+
+model KbChunk {
+  id         String                 @id @default(uuid()) @db.Uuid
+  documentId String                 @map("document_id") @db.Uuid
+  document   KbDocument             @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  ord        Int
+  section    String
+  scope      Json                   @default("{}")
+  content    String
+  embedding  Unsupported("vector")?
+  @@index([documentId])
+  @@map("kb_chunks")
+}
+
+model PolicyParameter {
+  id            String    @id @default(uuid()) @db.Uuid
+  code          String
+  version       Int
+  value         Json
+  status        String    // proposed | active | superseded | rejected
+  source        String
+  label         String
+  reason        String?
+  effectiveFrom DateTime? @map("effective_from") @db.Timestamptz
+  proposedBy    String?   @map("proposed_by") @db.Uuid
+  proposedRole  String?   @map("proposed_role")
+  approvedBy    String?   @map("approved_by") @db.Uuid
+  approvedRole  String?   @map("approved_role")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  @@unique([code, version])
+  @@index([code, status])
+  @@map("policy_parameters")
+}
+
+model AiAuthorityRule {
+  id             String  @id @default(uuid()) @db.Uuid
+  actionKey      String  @map("action_key")
+  authorityClass String  @map("authority_class")
+  description    String?
+  version        Int     @default(1)
+  active         Boolean @default(true)
+  @@unique([actionKey, version])
+  @@map("ai_authority_rules")
+}
+
+model DataSubjectRequest {
+  id         String    @id @default(uuid()) @db.Uuid
+  handledBy  String?   @map("handled_by") @db.Uuid
+  resolutionNoteEnc String? @map("resolution_note_enc")
+  customerId String    @map("customer_id") @db.Uuid
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type       String    // access | copy | correct | withdraw | delete
+  status     String    @default("open") // open | in_progress | closed | rejected
+  detailEnc  String?   @map("detail_enc")
+  dueAt      DateTime? @map("due_at") @db.Timestamptz
+  ticketId   String?   @map("ticket_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  closedAt   DateTime? @map("closed_at") @db.Timestamptz
+  @@map("data_subject_requests")
+}
+
+// Phase-3 tables, created now so the schema matches the ER diagram.
+model Survey {
+  id         String   @id @default(uuid()) @db.Uuid
+  code       String   @unique
+  sourceFile String   @map("source_file")
+  items      Json
+  active     Boolean  @default(false)
+  responses  SurveyResponse[]
+  @@map("surveys")
+}
+
+model SurveyResponse {
+  id          String   @id @default(uuid()) @db.Uuid
+  /// "customer" for post-service surveys; staff role (cp, staff, …) for usability surveys.
+  respondentRole String @default("customer") @map("respondent_role")
+  respondentUserId String? @map("respondent_user_id") @db.Uuid
+  completedAt DateTime? @map("completed_at") @db.Timestamptz
+  isDummy     Boolean  @default(false) @map("is_dummy")
+  surveyId    String   @map("survey_id") @db.Uuid
+  survey      Survey   @relation(fields: [surveyId], references: [id])
+  ticketId    String?  @map("ticket_id") @db.Uuid
+  channelCode String   @map("channel_code")
+  answers     Json
+  answeredAt  DateTime @default(now()) @map("answered_at") @db.Timestamptz
+  @@map("survey_responses")
+}
+
+model QaReview {
+  id              String   @id @default(uuid()) @db.Uuid
+  scorePercent    Decimal? @map("score_percent") @db.Decimal(5, 2)
+  noteEnc         String?  @map("note_enc")
+  ticketId        String   @map("ticket_id") @db.Uuid
+  reviewerId      String   @map("reviewer_id") @db.Uuid
+  formVersion     String   @map("form_version")
+  scores          Json
+  aiAnswerCorrect Boolean? @map("ai_answer_correct")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@map("qa_reviews")
+}
+
+model OrchestrationCycle {
+  id          String    @id @default(uuid()) @db.Uuid
+  cadence     String
+  periodStart DateTime  @map("period_start") @db.Date
+  checklist   Json
+  ownerId     String?   @map("owner_id") @db.Uuid
+  closedAt    DateTime? @map("closed_at") @db.Timestamptz
+  @@map("orchestration_cycles")
+}
+
+/// Development-only outbox read by the channel simulators (FR-52). Never used in production.
+model SimOutbox {
+  id          String   @id @default(uuid()) @db.Uuid
+  channelCode String   @map("channel_code")
+  recipient   String
+  payload     Json
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([channelCode, recipient, createdAt])
+  @@map("sim_outbox")
+}
+
+/// Written performance feedback from Staf PMB to a Mahasiswa CP (FR-34).
+model CpFeedback {
+  id          String   @id @default(uuid()) @db.Uuid
+  cpUserId    String   @map("cp_user_id") @db.Uuid
+  staffUserId String   @map("staff_user_id") @db.Uuid
+  ticketId    String?  @map("ticket_id") @db.Uuid
+  textEnc     String   @map("text_enc")
+  readAt      DateTime? @map("read_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([cpUserId, createdAt])
+  @@map("cp_feedback")
+}
+
+/// Periodic KPI reports (FR-39), generated by the worker or on demand.
+model GeneratedReport {
+  id          String   @id @default(uuid()) @db.Uuid
+  periodFrom  DateTime @map("period_from") @db.Timestamptz
+  periodTo    DateTime @map("period_to") @db.Timestamptz
+  format      String   // pdf | xlsx
+  filename    String
+  content     Bytes
+  includesDummy Boolean @map("includes_dummy")
+  createdBy   String?  @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  @@index([createdAt])
+  @@map("generated_reports")
+}

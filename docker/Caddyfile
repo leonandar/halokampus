@@ -1,0 +1,18 @@
+# Reverse proxy TLS untuk server on-premise. Ganti domain; Caddy mengurus sertifikat otomatis
+# (atau pakai `tls /etc/caddy/cert.pem /etc/caddy/key.pem` untuk sertifikat kampus).
+{$HALOKAMPUS_DOMAIN:halokampus.example.ac.id} {
+	encode gzip
+	# Webhook penyedia kanal langsung ke API
+	handle /webhooks/* {
+		reverse_proxy api:4000
+	}
+	# Konsol, widget, dan API (diteruskan oleh Next.js ke api:4000 secara internal)
+	handle {
+		reverse_proxy web:3000
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+	}
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@hk/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/server.ts",
+    "start": "tsx src/server.ts",
+    "worker": "tsx watch --env-file=../../.env src/worker.ts",
+    "worker:start": "tsx src/worker.ts",
+    "audit:verify": "tsx --env-file=../../.env src/scripts/audit-verify.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "seed": "tsx --env-file=../../.env src/scripts/seed.ts",
+    "create-admin": "tsx src/scripts/create-admin.ts",
+    "seed:production": "tsx src/scripts/seed.ts --production"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.5",
+    "@fastify/cors": "11.4.2",
+    "@fastify/multipart": "9.4.0",
+    "@fastify/rate-limit": "10.3.0",
+    "@hk/ai": "workspace:*",
+    "@hk/db": "workspace:*",
+    "@hk/domain": "workspace:*",
+    "@hk/mock-pmb": "workspace:*",
+    "@hk/shared": "workspace:*",
+    "@node-rs/argon2": "2.2.2",
+    "bullmq": "5.81.5",
+    "fastify": "5.12.8",
+    "ioredis": "5.11.1",
+    "js-yaml": "4.3.2",
+    "nodemailer": "6.10.1",
+    "otplib": "12.0.1",
+    "socket.io": "4.8.4",
+    "zod": "3.25.76",
+    "@socket.io/redis-adapter": "8.3.0",
+    "@socket.io/redis-emitter": "5.1.0",
+    "exceljs": "4.4.0",
+    "pdfkit": "0.15.2",
+    "mammoth": "1.8.0",
+    "@hk/kpi": "workspace:*",
+    "pdfjs-dist": "4.10.38"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "4.0.9",
+    "@types/nodemailer": "6.4.24",
+    "@types/supertest": "6.0.3",
+    "supertest": "7.3.2",
+    "socket.io-client": "4.8.4",
+    "@types/pdfkit": "0.13.9"
+  }
+}

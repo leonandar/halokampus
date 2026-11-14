@@ -1,0 +1,19 @@
+{
+  "ticketsPerDay": 5000,
+  "days": 7,
+  "tickets": 35000,
+  "events": 273000,
+  "computeMs": {
+    "min": 627,
+    "max": 733
+  },
+  "computeWithChannelFilterMs": 414,
+  "heapUsedMB": 181,
+  "sample": {
+    "frt": 102.9,
+    "asa": 253.18,
+    "containment": 60,
+    "esc_t2": 30,
+    "esc_t3": 10
+  }
+}

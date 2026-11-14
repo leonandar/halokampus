@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-11-13T09:17:12.209Z",
+  "target": {
+    "rate": 5,
+    "durationSeconds": 60,
+    "customers": 300,
+    "messages": 300
+  },
+  "achievedRatePerSecond": 5,
+  "httpErrors": 0,
+  "httpMs": {
+    "p50": 38.4,
+    "p95": 47.4,
+    "max": 60
+  },
+  "messagesReceived": 300,
+  "messagesWithReply": 300,
+  "replyMs": {
+    "p50": 41,
+    "p95": 60,
+    "p99": 75,
+    "max": 81
+  },
+  "aiPipelineMs": {
+    "p50": 5,
+    "p95": 7,
+    "n": 150
+  },
+  "nfr01_p95_within_5s": true,
+  "slaTimers": [
+    {
+      "tier": "T3",
+      "state": "running",
+      "n": 50
+    },
+    {
+      "tier": "T1",
+      "state": "met",
+      "n": 300
+    },
+    {
+      "tier": "T2",
+      "state": "running",
+      "n": 100
+    }
+  ]
+}

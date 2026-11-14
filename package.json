@@ -1,0 +1,39 @@
+{
+  "name": "halokampus",
+  "private": true,
+  "description": "haloK@MPUS \u2014 helpdesk PMB omnichannel dengan Contact Personnel tiga lapis",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:infra": "docker compose up -d postgres redis mailpit",
+    "db:migrate": "pnpm --filter @hk/db migrate",
+    "db:seed": "pnpm --filter @hk/api seed",
+    "dev:api": "pnpm --filter @hk/api dev",
+    "dev:worker": "pnpm --filter @hk/api worker",
+    "dev:mock-pmb": "pnpm --filter @hk/mock-pmb dev",
+    "dev:web": "pnpm --filter @hk/web dev",
+    "build:widget": "pnpm --filter @hk/widget build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test --trace off",
+    "audit:verify": "pnpm --filter @hk/api audit:verify",
+    "verify": "pnpm typecheck && pnpm test",
+    "loadtest": "tsx scripts/loadtest.ts",
+    "bench:kpi": "tsx scripts/bench-kpi.mts",
+    "test:report": "tsx scripts/test-report.mts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@axe-core/playwright": "4.14.0",
+    "@types/node": "22.20.5",
+    "@vitest/coverage-v8": "3.2.7",
+    "typescript": "5.9.3",
+    "tsx": "4.23.15",
+    "vitest": "3.2.7",
+    "@hk/db": "workspace:*",
+    "@hk/kpi": "workspace:*"
+  }
+}

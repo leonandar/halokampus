@@ -1,0 +1,14 @@
+# DUMMY — modul survei usability (FR-58). haloK@MPUS TIDAK menulis butir instrumen;
+# butir resmi (mis. SUS) dan skalanya disediakan tim instrumen penelitian (OP-04).
+code: sus
+kind: usability
+title: "[DUMMY] Survei usability"
+dummy: true
+audience: [cp, staff, leader, finance, admin]
+items:
+  - id: sus_1
+    text: "[DUMMY] Butir usability 1 — teks resmi menunggu tim instrumen."
+    scale: { min: 1, max: 5, minLabel: "[DUMMY] rendah", maxLabel: "[DUMMY] tinggi" }
+  - id: sus_2
+    text: "[DUMMY] Butir usability 2 — teks resmi menunggu tim instrumen."
+    scale: { min: 1, max: 5, minLabel: "[DUMMY] rendah", maxLabel: "[DUMMY] tinggi" }

@@ -1,0 +1,22 @@
+# Kelas kewenangan AI (aturan perutean 1, FR-04). Dimuat ke tabel ai_authority_rules.
+# Tindakan yang tidak tercantum otomatis "forbidden" (gagal-tertutup).
+rules:
+  - { action: kb.answer,            class: allowed,       description: "Menjawab informasi PMB dari basis pengetahuan resmi" }
+  - { action: pmb.read_status,      class: allowed,       description: "Membaca status pendaftaran" }
+  - { action: reminder.send,        class: allowed,       description: "Pengingat tenggat proaktif (dengan persetujuan)" }
+  - { action: file.validate,        class: allowed,       description: "Validasi kelengkapan berkas (format, ukuran, jenis)" }
+  - { action: schedule.reschedule,  class: allowed,       description: "Penjadwalan ulang yang diizinkan kebijakan (Fase 2)" }
+  - { action: verify.request,       class: allowed,       description: "Meminta nomor pendaftaran untuk verifikasi OTP" }
+  - { action: pdp.link,             class: allowed,       description: "Mengirim tautan hak data pribadi" }
+  - { action: schedule.offer,       class: allowed,       description: "Menawarkan slot jadwal ulang dari sistem PMB" }
+  - { action: handoff.escalate,     class: must_escalate, description: "Pengalihan ke manusia" }
+  - { action: pmb.update_applicant, class: forbidden,     description: "Mengubah data pendaftar" }
+  - { action: decision.admission,   class: forbidden,     description: "Memutuskan kelulusan" }
+  - { action: decision.exception,   class: forbidden,     description: "Memutuskan pengecualian" }
+forbidden_output_patterns:
+  - { pattern: "(pasti|dijamin|tentu) (lulus|diterima|lolos)", reason: "Menjanjikan kelulusan" }
+  - { pattern: "\\bdijamin\\b", reason: "Menjanjikan hal di luar pedoman" }
+  - { pattern: "(sudah|telah) (saya|kami) (ubah|ganti|perbaiki|koreksi)", reason: "Menyatakan mengubah data pendaftar" }
+  - { pattern: "(dispensasi|pengecualian|keringanan).{0,20}(disetujui|diberikan|dikabulkan)", reason: "Memutuskan pengecualian" }
+forbidden_data_request_patterns:
+  - { pattern: "(kirim|sebutkan|berikan|masukkan|ketik).{0,30}(\\bnik\\b|nomor ktp|nama ibu|kata sandi|password|\\bpin\\b|kode otp|nomor rekening|cvv)", reason: "Meminta data pribadi di luar daftar yang diizinkan" }

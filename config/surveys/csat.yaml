@@ -1,0 +1,9 @@
+# DUMMY — butir dan skala sementara. Teks resmi CSAT disediakan tim instrumen penelitian (OP-04).
+# haloK@MPUS tidak menulis butir instrumen sendiri; ganti seluruh isi `items` dengan butir resmi.
+code: csat
+title: "[DUMMY] Survei kepuasan"
+dummy: true
+items:
+  - id: csat_1
+    text: "[DUMMY] Butir CSAT-1 — teks resmi menunggu tim instrumen."
+    scale: { min: 1, max: 5, minLabel: "[DUMMY] rendah", maxLabel: "[DUMMY] tinggi" }

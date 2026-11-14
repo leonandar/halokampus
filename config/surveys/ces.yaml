@@ -1,0 +1,8 @@
+# DUMMY — butir dan skala sementara. Teks resmi CES disediakan tim instrumen penelitian (OP-04).
+code: ces
+title: "[DUMMY] Survei usaha pelanggan"
+dummy: true
+items:
+  - id: ces_1
+    text: "[DUMMY] Butir CES-1 — teks resmi menunggu tim instrumen."
+    scale: { min: 1, max: 5, minLabel: "[DUMMY] rendah", maxLabel: "[DUMMY] tinggi" }

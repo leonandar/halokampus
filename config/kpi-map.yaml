@@ -1,0 +1,33 @@
+# Pemetaan KPI internal → kode KPI-01…KPI-22 Buku Model haloK@MPUS (FR-61).
+# [PERLU DATA] Isi `kode` sesuai Buku Model. Selama null, dasbor menampilkan id internal saja.
+map:
+  frt: null
+  asa: null
+  sl_t1_prm-02: null
+  sl_t2_prm-03: null
+  sl_t3_prm-04: null
+  sl_t3_prm-05: null
+  aht_t2: null
+  aht_t3: null
+  aht_t1_ai: null
+  resolution: null
+  fcr: null
+  containment: null
+  esc_t2: null
+  esc_t3: null
+  esc_mandatory: null
+  reopen: null
+  handoff: null
+  abandonment: null
+  csat: null
+  ces: null
+  nps: null
+  qa: null
+  ai_accuracy: null
+  override: null
+  confidence_below: null
+  backlog: null
+  occupancy: null
+  volume_messages: null
+  volume_tickets: null
+  dsr: null

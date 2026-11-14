@@ -1,0 +1,10 @@
+# Daftar data yang boleh diminta/disimpan haloK@MPUS (FR-64). Di luar daftar ini dilarang.
+allowed:
+  - { field: display_name, label: "Nama panggilan" }
+  - { field: pmb_registration_no, label: "Nomor pendaftaran" }
+  - { field: contact_email, label: "Email (untuk OTP & balasan)" }
+  - { field: contact_phone, label: "Nomor WhatsApp (untuk OTP & balasan)" }
+  - { field: program_code, label: "Program studi pilihan" }
+  - { field: admission_path, label: "Jalur pendaftaran" }
+  - { field: stage, label: "Tahap pendaftaran" }
+notice_version: "PDP-NOTICE-DUMMY-v1"

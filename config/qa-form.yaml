@@ -1,0 +1,7 @@
+# DUMMY — formulir QA sementara (FR-36). Kriteria resmi ditetapkan Staf PMB/peneliti [PERLU DATA].
+version: "QA-DUMMY-v1"
+criteria:
+  - { id: c1, label: "[DUMMY] Kriteria 1", max: 5 }
+  - { id: c2, label: "[DUMMY] Kriteria 2", max: 5 }
+  - { id: c3, label: "[DUMMY] Kriteria 3", max: 5 }
+# Penilaian benar/salah jawaban AI selalu ditanyakan bila tiket memuat jawaban AI (sumber KPI akurasi AI).

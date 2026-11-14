@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* haloK@MPUS design tokens. Text/background pairs are chosen for ≥ 4.5:1 contrast (NFR-09). */
+@theme {
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-line: #cbd5e1;
+  --color-surface: #ffffff;
+  --color-canvas: #f1f5f9;
+  --color-brand: #0b5cad;
+  --color-brand-ink: #ffffff;
+  --color-brand-soft: #e0ecfa;
+  --color-ok: #166534;
+  --color-ok-soft: #dcfce7;
+  --color-warn: #92400e;
+  --color-warn-soft: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+  --color-ai: #5b21b6;
+  --color-ai-soft: #ede9fe;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body { background: var(--color-canvas); color: var(--color-ink); }
+body { font-family: var(--font-sans); }
+
+/* Every interactive control is at least 44 px tall/wide. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 44px; min-width: 44px; padding: 0 1rem; border-radius: .5rem;
+  font-weight: 600; font-size: .9375rem; border: 1px solid transparent; cursor: pointer;
+}
+.btn:focus-visible, .field:focus-visible, a:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn-primary { background: var(--color-brand); color: var(--color-brand-ink); }
+.btn-primary:hover:not(:disabled) { background: #084a8c; }
+.btn-ghost { background: var(--color-surface); color: var(--color-ink); border-color: var(--color-line); }
+.btn-ghost:hover:not(:disabled) { background: var(--color-canvas); }
+.btn-danger { background: var(--color-danger); color: #fff; }
+.btn-warn { background: var(--color-warn); color: #fff; }
+.field {
+  width: 100%; min-height: 44px; padding: .5rem .75rem; border-radius: .5rem;
+  border: 1px solid #94a3b8; background: #fff; color: var(--color-ink); font-size: 1rem;
+}
+.card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: .75rem; }
+.badge { display: inline-flex; align-items: center; gap: .25rem; padding: .125rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 600; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Data-viz roles (validated: dataviz validate_palette.js, light surface). */
+:root {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --ordinal-1: #86b6ef;
+  --ordinal-2: #5598e7;
+  --ordinal-3: #2a78d6;
+  --ordinal-4: #1c5cab;
+  --ordinal-5: #104281;
+  --grid: #e2e8f0;
+  --status-good: #166534;
+  --status-serious: #b91c1c;
+}
+.tabular { font-variant-numeric: tabular-nums; }

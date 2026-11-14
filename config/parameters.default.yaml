@@ -1,0 +1,35 @@
+# Nilai awal parameter kebijakan (SRS §3). Dimuat ke policy_parameters sebagai versi 1.
+# source: "penelitian" = usulan penelitian dari spesifikasi; "teknis" = usulan teknis;
+# "DUMMY" = nilai uji pengembangan, wajib diganti; null = [PERLU DATA] (fitur terkait nonaktif).
+parameters:
+  PRM-01: { value: 0.75, source: penelitian, label: "Ambang keyakinan AI" }
+  PRM-02: { value: { unit: seconds, value: 5 }, source: penelitian, label: "SLA respons Tingkat 1 (AI)" }
+  PRM-03: { value: { unit: service_seconds, value: 180 }, source: penelitian, label: "SLA tanggapan Tingkat 2 (dalam jam layanan CP)" }
+  PRM-04: { value: { unit: business_days, value: 1 }, source: penelitian, label: "SLA penyelesaian Tingkat 3" }
+  PRM-05: { value: { unit: business_days, value: 2 }, source: penelitian, label: "SLA kategori pembayaran" }
+  PRM-06: { value: { normal: weekly, peak: daily }, source: penelitian, label: "Siklus orkestrasi" }
+  PRM-07:
+    source: DUMMY
+    label: "Jam kerja & kalender libur"
+    value:
+      timezone: Asia/Jakarta
+      holidays: []
+      days:
+        "1": [["08:00", "16:00"]]
+        "2": [["08:00", "16:00"]]
+        "3": [["08:00", "16:00"]]
+        "4": [["08:00", "16:00"]]
+        "5": [["08:00", "16:00"]]
+  PRM-08: { value: null, source: "PERLU DATA", label: "Masa retensi data percakapan (hari)" }
+  PRM-09: { value: { retrieval: 0.5, intent: 0.3, self: 0.2 }, source: teknis, label: "Bobot skor keyakinan (wajib dikalibrasi)" }
+  PRM-10: { value: 0.25, source: DUMMY, label: "Ambang kemiripan minimum retrieval (dikalibrasi untuk embedding mock)" }
+  PRM-11: { value: null, source: "PERLU DATA", label: "Batas tidak aktif sebelum ditinggalkan (menit)" }
+  PRM-12: { value: null, source: "PERLU DATA", label: "Jendela N hari FCR/reopen" }
+  PRM-13: { value: null, source: "PERLU DATA", label: "SLA permintaan hak subjek data" }
+  PRM-14: { value: {}, source: "PERLU DATA", label: "Target KPI" }
+  PRM-15: { value: { surveys: [csat, ces] }, source: DUMMY, label: "Survei pascalayanan aktif (butir & skala di config/surveys)" }
+  PRM-16: { value: null, source: "PERLU DATA", label: "Aturan sampel QA" }
+  PRM-17: { value: { ttlSeconds: 300, maxAttempts: 5 }, source: teknis, label: "OTP: masa berlaku & batas percobaan" }
+  PRM-18: { value: null, source: "PERLU DATA", label: "Rentang masa puncak" }
+  PRM-19: { value: null, source: teknis, label: "Jam layanan Mahasiswa CP (null = sama dengan PRM-07)" }
+  PRM-20: { value: { default: [mock] }, source: teknis, label: "Penugasan penyedia LLM per agen & cadangan" }

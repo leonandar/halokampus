@@ -1,0 +1,14 @@
+{
+  "name": "@hk/mock-pmb",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Mock API sistem informasi PMB — data DUMMY untuk penelitian (AS-01)",
+  "exports": { ".": "./src/app.ts" },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": { "fastify": "5.12.8" }
+}
