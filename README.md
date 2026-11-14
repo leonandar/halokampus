@@ -93,10 +93,18 @@ git clone <repositori-haloKampus> /opt/halokampus
 ```
 
 ```bash
-cd /opt/halokampus && cp .env.example .env
+cd /opt/halokampus
 ```
 
-3. Sunting `.env` untuk produksi:
+3. Buat `.env` produksi otomatis (kunci, kata sandi basis data, dan pengaturan aman dibuat sekaligus), lalu
+   sunting bagian yang khusus untuk kampus Anda (SMTP, kanal, LLM):
+
+```bash
+scripts/setup-env.sh <domain>
+```
+
+   Untuk mencoba di komputer sendiri pakai `scripts/setup-env.sh localhost`, lalu buka `https://localhost/masuk`
+   (peramban akan memperingatkan sertifikat lokal Caddy; pilih lanjutkan). Isi yang dibuat skrip:
    - `POSTGRES_PASSWORD` kuat; `DATABASE_URL` memakai host `postgres` dan kata sandi yang sama.
    - Tiga kunci kriptografi baru (`openssl rand -base64 32` untuk masing-masing). **Simpan cadangannya**: tanpa
      `DATA_ENCRYPTION_KEY` data terenkripsi tidak dapat dibaca.
