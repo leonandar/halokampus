@@ -131,6 +131,8 @@ docker compose exec api pnpm --filter @hk/api seed:production
 docker compose exec api pnpm --filter @hk/api create-admin -- admin@kampus.ac.id "Admin TI" 'KataSandiSangatKuat!'
 ```
 
+   Ada spasi setelah `--`; kata sandi minimal 12 karakter, diapit tanda kutip tunggal.
+
 6. Masuk sebagai Admin di `https://<domain>/masuk`, buat akun Pimpinan, Staf PMB, Mahasiswa CP, Keuangan;
    aktifkan kanal yang dipakai di halaman Admin.
 7. Pimpinan + Staf PMB menetapkan parameter yang masih `DUMMY`/`[PERLU DATA]` di `/parameter` (terutama PRM-07

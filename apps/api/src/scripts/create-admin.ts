@@ -6,9 +6,18 @@ import { PrismaClient } from "@hk/db";
  *   pnpm --filter @hk/api create-admin -- admin@kampus.ac.id "Nama Admin" 'KataSandiKuat!'
  * Further users are created from the Admin page.
  */
-const [email, name, password] = process.argv.slice(2).filter((a) => a !== "--");
-if (!email || !name || !password || password.length < 12) {
-  console.error("Pemakaian: create-admin <email> <nama> <kata-sandi minimal 12 karakter>");
+// Tolerate "--email" (a missing space after pnpm's "--" separator).
+const [rawEmail, name, password] = process.argv.slice(2).filter((a) => a !== "--");
+const email = rawEmail?.replace(/^-+/, "");
+const usage = "Pemakaian: create-admin -- <email> \"<nama>\" '<kata sandi minimal 12 karakter>'";
+const problems: string[] = [];
+if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) problems.push(`Email tidak valid: ${rawEmail ?? "(kosong)"}`);
+if (!name) problems.push("Nama belum diisi");
+if (!password) problems.push("Kata sandi belum diisi");
+else if (password.length < 12) problems.push(`Kata sandi terlalu pendek: ${password.length} karakter, minimal 12`);
+if (problems.length > 0 || !email || !name || !password) {
+  for (const p of problems) console.error(`✗ ${p}`);
+  console.error(usage);
   process.exit(1);
 }
 const db = new PrismaClient();
