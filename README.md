@@ -11,6 +11,7 @@ ia berada di atas sistem PMB dan, selama penelitian, memakai mock API berdata `D
 | [`docs/ARSITEKTUR.md`](docs/ARSITEKTUR.md) | Arsitektur, ER, katalog peristiwa, keputusan teknis |
 | [`docs/PDP.md`](docs/PDP.md) | Pelindungan data pribadi & aliran data ke LLM |
 | [`docs/KPI.md`](docs/KPI.md) | Definisi rumus setiap KPI dan contoh hitungan tangan |
+| [`docs/INSTALASI.md`](docs/INSTALASI.md) | Spesifikasi & langkah instalasi untuk macOS, Windows, Linux, server |
 | [`docs/PANDUAN-PENGGUNA.md`](docs/PANDUAN-PENGGUNA.md) | Panduan per peran |
 | [`docs/SKENARIO-UJI.md`](docs/SKENARIO-UJI.md) | Skenario & hasil uji (dibuat otomatis dari hasil uji) |
 | [`docs/VERIFIKASI-NFR.md`](docs/VERIFIKASI-NFR.md) | Hasil uji beban, benchmark KPI, keamanan |
@@ -82,6 +83,8 @@ Akun `DUMMY` (kata sandi = `SEED_DEFAULT_PASSWORD`): `cp1@dummy.halokampus.local
 `pimpinan@…`, `keuangan@…`, `admin@dummy.halokampus.local`. Nomor pendaftaran `DUMMY`: `PMB-2027-000100` … `PMB-2027-000159`.
 
 ## Instalasi server (on-premise)
+
+Spesifikasi perangkat keras, platform lain (macOS, Windows, RHEL), jaringan, dan penanganan masalah: [`docs/INSTALASI.md`](docs/INSTALASI.md).
 
 Contoh untuk Ubuntu Server 22.04/24.04 dengan nama domain yang mengarah ke server.
 

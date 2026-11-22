@@ -1,6 +1,7 @@
 # haloK@MPUS — semua layanan. Pengembangan: `docker compose up -d postgres redis mailpit`
 # lalu jalankan api/worker/web/mock-pmb dengan pnpm. Produksi lokal: `docker compose --profile app up -d`.
 # LLM lokal: tambahkan `--profile local-llm`.
+# Hanya Caddy (80/443) yang terbuka ke jaringan; port lain terikat ke 127.0.0.1 (akses dari server itu sendiri).
 name: halokampus
 services:
   postgres:
@@ -9,7 +10,7 @@ services:
       POSTGRES_USER: halokampus
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-halokampus_dev}
       POSTGRES_DB: halokampus
-    ports: ["5432:5432"]
+    ports: ["127.0.0.1:5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U halokampus"]
@@ -19,21 +20,21 @@ services:
   redis:
     image: redis:7.4-alpine
     restart: unless-stopped
-    ports: ["6379:6379"]
+    ports: ["127.0.0.1:6379:6379"]
   mailpit:
     image: axllent/mailpit:v1.21
-    ports: ["8025:8025", "1025:1025"]
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
   ollama:
     image: ollama/ollama:0.5.7
     profiles: [local-llm]
-    ports: ["11434:11434"]
+    ports: ["127.0.0.1:11434:11434"]
     volumes: [ollama:/root/.ollama]
   mock-pmb:
     profiles: [app]
     build: { context: ., dockerfile: docker/node.Dockerfile }
     command: ["pnpm", "--filter", "@hk/mock-pmb", "start"]
     env_file: .env
-    ports: ["4100:4100"]
+    ports: ["127.0.0.1:4100:4100"]
     restart: unless-stopped
   api:
     profiles: [app]
@@ -50,7 +51,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_started }
     restart: unless-stopped
-    ports: ["4000:4000"]
+    ports: ["127.0.0.1:4000:4000"]
   worker:
     profiles: [app]
     build: { context: ., dockerfile: docker/node.Dockerfile }
@@ -74,7 +75,7 @@ services:
     environment:
       API_INTERNAL_URL: http://api:4000
     depends_on: [api]
-    ports: ["3000:3000"]
+    ports: ["127.0.0.1:3000:3000"]
     restart: unless-stopped
   caddy:
     image: caddy:2.8
