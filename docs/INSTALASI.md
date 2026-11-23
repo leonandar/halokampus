@@ -164,7 +164,7 @@ cd ~/halokampus
 
    Di server, folder `/opt/halokampus` lebih lazim.
 
-2. Buat `.env` produksi. Ganti `localhost` dengan domain server, misalnya `halokampus.uny.ac.id`:
+2. Buat `.env` produksi. Untuk uji coba pakai `localhost`; untuk server produksi pakai domain resmi `app.halokampus.id`:
 
 ```bash
 scripts/setup-env.sh localhost
@@ -192,13 +192,15 @@ docker compose exec api pnpm --filter @hk/api seed:production
 docker compose exec api pnpm --filter @hk/api create-admin -- admin@kampus.ac.id "Nama Admin" 'KataSandiMinimal12!'
 ```
 
-6. Buka `https://<domain>/masuk`. Pada `localhost`, peramban memperingatkan soal sertifikat lokal Caddy;
+6. Buka `https://app.halokampus.id/masuk` (uji coba: `https://localhost/masuk`). Pada `localhost`, peramban memperingatkan soal sertifikat lokal Caddy;
    pilih lanjutkan (Safari: *Show Details → visit this website*).
 7. Lanjutkan konfigurasi layanan seperti README langkah 6–9: akun petugas, kanal, parameter, basis
    pengetahuan, dan widget.
 
 ### 5.6 Server dengan domain kampus
 
+- Domain produksi: **`app.halokampus.id`**. Buat rekaman DNS `A` (dan `AAAA` bila ada IPv6) `app.halokampus.id` → IP publik server, lalu jalankan `scripts/setup-env.sh app.halokampus.id`.
+- Setelah DNS aktif, alamat layanan: konsol `https://app.halokampus.id/masuk`, widget `https://app.halokampus.id/widget/halokampus-widget.js`, webhook `https://app.halokampus.id/webhooks/<kanal>`.
 - Arahkan DNS domain ke IP server. Caddy mengambil sertifikat Let's Encrypt otomatis **bila** port 80/443 dapat
   dijangkau dari internet.
 - Untuk server intranet (tidak terjangkau internet), pakai sertifikat kampus. Di `docker/Caddyfile`, tambahkan

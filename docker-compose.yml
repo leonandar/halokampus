@@ -82,7 +82,7 @@ services:
     profiles: [app]
     ports: ["80:80", "443:443"]
     environment:
-      HALOKAMPUS_DOMAIN: ${HALOKAMPUS_DOMAIN:-halokampus.example.ac.id}
+      HALOKAMPUS_DOMAIN: ${HALOKAMPUS_DOMAIN:-app.halokampus.id}
     volumes: ["./docker/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy_data:/data"]
     depends_on: [web, api]
     restart: unless-stopped

@@ -1,6 +1,6 @@
 # Reverse proxy TLS untuk server on-premise. Ganti domain; Caddy mengurus sertifikat otomatis
 # (atau pakai `tls /etc/caddy/cert.pem /etc/caddy/key.pem` untuk sertifikat kampus).
-{$HALOKAMPUS_DOMAIN:halokampus.example.ac.id} {
+{$HALOKAMPUS_DOMAIN:app.halokampus.id} {
 	encode gzip
 	# Webhook penyedia kanal langsung ke API
 	handle /webhooks/* {

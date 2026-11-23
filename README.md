@@ -103,7 +103,7 @@ cd /opt/halokampus
    sunting bagian yang khusus untuk kampus Anda (SMTP, kanal, LLM):
 
 ```bash
-scripts/setup-env.sh <domain>
+scripts/setup-env.sh app.halokampus.id
 ```
 
    Untuk mencoba di komputer sendiri pakai `scripts/setup-env.sh localhost`, lalu buka `https://localhost/masuk`
@@ -111,10 +111,10 @@ scripts/setup-env.sh <domain>
    - `POSTGRES_PASSWORD` kuat; `DATABASE_URL` memakai host `postgres` dan kata sandi yang sama.
    - Tiga kunci kriptografi baru (`openssl rand -base64 32` untuk masing-masing). **Simpan cadangannya**: tanpa
      `DATA_ENCRYPTION_KEY` data terenkripsi tidak dapat dibaca.
-   - `COOKIE_SECURE=true`, `ENABLE_SIMULATORS=false`, `API_PUBLIC_URL`/`WEB_PUBLIC_URL`/`CORS_ORIGINS` = `https://<domain>`
+   - `COOKIE_SECURE=true`, `ENABLE_SIMULATORS=false`, `API_PUBLIC_URL`/`WEB_PUBLIC_URL`/`CORS_ORIGINS` = `https://app.halokampus.id`
      (tambahkan domain situs PMB di `CORS_ORIGINS` bila widget ditanam di sana).
    - `EMAIL_WEBHOOK_TOKEN` dan rahasia webhook kanal yang dipakai; `SMTP_*` server email kampus.
-   - `HALOKAMPUS_DOMAIN=<domain>` untuk Caddy (TLS otomatis), atau ganti `docker/Caddyfile` dengan sertifikat kampus.
+   - `HALOKAMPUS_DOMAIN=app.halokampus.id` untuk Caddy (TLS otomatis), atau ganti `docker/Caddyfile` dengan sertifikat kampus.
    - Penyedia LLM: untuk data tetap di server, jalankan Ollama (`--profile local-llm`) dan isi `OLLAMA_MODEL`,
      `OLLAMA_EMBED_MODEL`, `EMBEDDING_PROVIDER=ollama`.
    Proses API/worker **menolak berjalan** bila pengaturan produksi tidak aman, dengan daftar masalahnya di log.
@@ -136,13 +136,13 @@ docker compose exec api pnpm --filter @hk/api create-admin -- admin@kampus.ac.id
 
    Ada spasi setelah `--`; kata sandi minimal 12 karakter, diapit tanda kutip tunggal.
 
-6. Masuk sebagai Admin di `https://<domain>/masuk`, buat akun Pimpinan, Staf PMB, Mahasiswa CP, Keuangan;
+6. Masuk sebagai Admin di `https://app.halokampus.id/masuk`, buat akun Pimpinan, Staf PMB, Mahasiswa CP, Keuangan;
    aktifkan kanal yang dipakai di halaman Admin.
 7. Pimpinan + Staf PMB menetapkan parameter yang masih `DUMMY`/`[PERLU DATA]` di `/parameter` (terutama PRM-07
    jam kerja, PRM-08 retensi, PRM-10 ambang retrieval, PRM-15 survei, PRM-20 penyedia LLM).
 8. Staf PMB mengunggah pedoman PMB resmi di Konsol Staf → Basis pengetahuan (uji tanya-jawab sebelum terbit).
 9. Tanam widget di situs PMB:
-   `<script src="https://<domain>/widget/halokampus-widget.js" data-api="https://<domain>" defer></script>`
+   `<script src="https://app.halokampus.id/widget/halokampus-widget.js" data-api="https://app.halokampus.id" defer></script>`
 
 Cadangan: jadwalkan `pg_dump` harian untuk volume `pgdata`, simpan bersama salinan `.env` di tempat aman.
 Pembaruan: `git pull && docker compose --profile app up -d --build`.
@@ -153,10 +153,10 @@ Setiap kanal berjalan dalam mode simulator sampai kredensialnya diisi di `.env` 
 
 | Kanal | Mode | Webhook yang didaftarkan di penyedia |
 |---|---|---|
-| WhatsApp | `WHATSAPP_MODE=cloud_api` + `WHATSAPP_*` | `https://<domain>/webhooks/whatsapp` |
-| Instagram & Messenger | `META_MODE=graph` + `META_*` | `https://<domain>/webhooks/meta` |
-| Telegram | `TELEGRAM_MODE=bot_api` + `TELEGRAM_*` | `https://<domain>/webhooks/telegram` (setWebhook dengan `secret_token`) |
-| Email | `EMAIL_MODE=smtp` + `SMTP_*`, `EMAIL_WEBHOOK_TOKEN` | layanan inbound-parse/relay IMAP → `https://<domain>/webhooks/email` |
+| WhatsApp | `WHATSAPP_MODE=cloud_api` + `WHATSAPP_*` | `https://app.halokampus.id/webhooks/whatsapp` |
+| Instagram & Messenger | `META_MODE=graph` + `META_*` | `https://app.halokampus.id/webhooks/meta` |
+| Telegram | `TELEGRAM_MODE=bot_api` + `TELEGRAM_*` | `https://app.halokampus.id/webhooks/telegram` (setWebhook dengan `secret_token`) |
+| Email | `EMAIL_MODE=smtp` + `SMTP_*`, `EMAIL_WEBHOOK_TOKEN` | layanan inbound-parse/relay IMAP → `https://app.halokampus.id/webhooks/email` |
 
 Kanal dapat diaktifkan/nonaktifkan oleh Admin TI di halaman `/admin`. Bila worker dijalankan terpisah (`AI_INLINE=false`), setel `REALTIME_REDIS=true` di API dan worker.
 
